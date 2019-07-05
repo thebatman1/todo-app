@@ -1,0 +1,17 @@
+#container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 16px;
+    margin: 16px;
+}
+
+#tile {
+    background-color: yellow;
+    padding: 16px;
+    margin: 16px;
+    font-size: 16px;
+    font-family: 'Courier New', Courier, monospace;
+    outline: 0px;
+    outline-style: none;
+    border-radius: 10px;
+}
