@@ -17,8 +17,8 @@ const appendView = (node, type) => {
         const textView = document.createTextNode(createdOnString);
         view.setAttribute("id", "tile");
         view.appendChild(textView);
-        appendView(view, "P");
         appendView(view, "IMG");
+        appendView(view, "P");
         node.insertBefore(view, node.firstChild);
     } else { 
         const p = document.createElement("p");
