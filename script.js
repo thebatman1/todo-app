@@ -16,9 +16,9 @@ const appendView = (node, type) => {
         const createdOnString = `Created on ${(new Date()).toString().split(" ").slice(0, 5).join(" ")}`;
         const textView = document.createTextNode(createdOnString);
         view.setAttribute("id", "tile");
-        appendView(view, "IMG");
         view.appendChild(textView);
         appendView(view, "P");
+        appendView(view, "IMG");
         node.insertBefore(view, node.firstChild);
     } else { 
         const p = document.createElement("p");
