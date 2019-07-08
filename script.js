@@ -1,15 +1,25 @@
 console.log("Hello there!");
 
-
-// const createView = (type, firstTime=false) => { 
-//     switch (type) { 
-//         case "DIV":
-//             if (firstTime) { 
-
-//             }
-
-//     }
-// }
+const createView = (type, firstTime = false, jsonObj = null) => { 
+    const view = document.createElement(type);
+    switch (type) { 
+        case "DIV":
+            if (!firstTime) {
+                const createdOnString = jsonObj.title;
+                const textView = document.createTextNode(createdOnString);
+                view.setAttribute("class", "tile");
+                view.appendChild(textView);
+                appendView(view, "IMG");
+            }
+            return view;
+        case "P":
+            if (!firstTime) {
+                view.innerHTML = `<input type="text" class="todo-item" value="${jsonObj["todo-item"]}"
+                                    style="font-size:12px;width:100%">`;
+            }
+            return view;
+    }
+}
 
 /**
  * A function to append a View to a <div> or a <p> node
@@ -112,7 +122,12 @@ const loadViews = (jsonObj) => {
     const root = document.getElementById("container");
     const tiles = jsonObj.tiles;
     for (element of tiles) { 
-        addView(root, "DIV");
+        const view = createView("DIV", false, { "title": element.title });
+        root.appendChild(view);
+        for (todo of element.todos) { 
+            const todoItem = createView("P", false, { "todo-item": todo });
+            view.insertBefore(todoItem, view.lastChild);
+        }
     }
 }
 
