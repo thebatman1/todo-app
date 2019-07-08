@@ -1,5 +1,9 @@
 console.log("Hello there!");
 
+const removeElement = (node) => { 
+    node.parentNode.removeChild(node);
+}
+
 const createView = (type, firstTime = false, jsonObj = null) => { 
     const view = document.createElement(type);
     switch (type) { 
@@ -15,11 +19,18 @@ const createView = (type, firstTime = false, jsonObj = null) => {
         case "P":
             if (!firstTime) {
                 view.innerHTML = `<input type="text" class="todo-item" value="${jsonObj["todo-item"]}"
-                                    style="font-size:12px;width:100%">`;
+                                    style="font-size:12px;width:85%">`;
             }
+            view.appendChild(createView("IMG"));
+            return view;
+        case "IMG":
+            view.setAttribute("src", "images/clear.png");
+            view.setAttribute("style", "margin-left:8px;vertical-align:sub")
+            view.addEventListener("click", () => removeElement(view.parentNode));
             return view;
     }
 }
+
 
 /**
  * A function to append a View to a <div> or a <p> node
@@ -29,7 +40,8 @@ const createView = (type, firstTime = false, jsonObj = null) => {
 const appendView = (node, type) => {
     const view = document.createElement(type);
     if (type === "P") {
-        view.innerHTML = `<input type="text" class="todo-item" style="font-size:12px;width:100%">`;
+        view.innerHTML = `<input type="text" class="todo-item" style="font-size:12px;width:85%">`;
+        view.appendChild(createView("IMG"));
         node.insertBefore(view, node.lastChild);
     } else if (type === "DIV") {
         // Create a new tile and append
@@ -71,11 +83,21 @@ const onClick = (elementId) => {
 const getContents = (elementId) => { 
     const root = document.getElementById(elementId);
     let jsonString = `{ "tiles": [`;
-    for (element of root.getElementsByClassName("tile")) { 
+    const tiles = root.getElementsByClassName("tile");
+    if (tiles.length === 0) { 
+        jsonString += `]}`;
+        return jsonString;
+    }
+    for (element of tiles) { 
         jsonString += `{
                            "title": "${element.childNodes[0].data}",
                            "todos": [`;
-        for (child of element.getElementsByClassName("todo-item")) {
+        const todoItems = element.getElementsByClassName("todo-item");
+        if (todoItems.length === 0) { 
+            jsonString += `]},`;
+            continue;
+        }
+        for (child of todoItems) {
             if (child.value) {
                 jsonString += `"${child.value}", `;
             }
@@ -97,20 +119,8 @@ const saveContents = () => {
 }
 
 const loadContents = () => {
-    if ("greetings" in localStorage) {
-        console.log(localStorage.getItem("greetings"));
-    }
-    if ("name" in localStorage) {
-        console.log(localStorage.getItem("name"));
-    }
-    if ("username" in localStorage) {
-        console.log(localStorage.getItem("username"));
-    }
     if ("jsonString" in localStorage) {
-        console.log(JSON.parse(localStorage.getItem("jsonString")));
         loadViews(JSON.parse(localStorage.getItem("jsonString")));
-    } else {
-        console.log("New user!")
     }
 }
 
@@ -122,6 +132,9 @@ const loadViews = (jsonObj) => {
     const root = document.getElementById("container");
     const tiles = jsonObj.tiles;
     for (element of tiles) { 
+        if (element.todos.length === 0) { 
+            continue;
+        }
         const view = createView("DIV", false, { "title": element.title });
         root.appendChild(view);
         for (todo of element.todos) { 
