@@ -4,6 +4,19 @@ const removeElement = (node) => {
     node.parentNode.removeChild(node);
 }
 
+
+const saveContents = () => { 
+    localStorage.setItem("jsonString", getContents("container"));
+}
+
+
+const loadContents = () => {
+    if ("jsonString" in localStorage) {
+        loadViews(JSON.parse(localStorage.getItem("jsonString")));
+    }
+}
+
+
 const createView = (type, firstTime = false, jsonObj = null) => { 
     const view = document.createElement(type);
     switch (type) { 
@@ -13,20 +26,27 @@ const createView = (type, firstTime = false, jsonObj = null) => {
                 const textView = document.createTextNode(createdOnString);
                 view.setAttribute("class", "tile");
                 view.appendChild(textView);
+                view.appendChild(createView("IMG", false, {"src":"images/rubbish-bin.png"}));
                 appendView(view, "IMG");
             }
             return view;
         case "P":
             if (!firstTime) {
-                view.innerHTML = `<input type="text" class="todo-item" value="${jsonObj["todo-item"]}"
+                view.innerHTML = `<input type="text" class="todo-item" 
+                                    value="${(jsonObj["todo-item"] === "-1")?" ":jsonObj["todo-item"]}"
+                                    onfocusout="saveContents()"
                                     style="font-size:12px;width:85%">`;
             }
-            view.appendChild(createView("IMG"));
+            view.appendChild(createView("IMG", false, {"src":"images/clear.png"}));
             return view;
         case "IMG":
-            view.setAttribute("src", "images/clear.png");
+            view.setAttribute("src", jsonObj["src"]);
             view.setAttribute("style", "margin-left:8px;vertical-align:sub")
-            view.addEventListener("click", () => removeElement(view.parentNode));
+            view.addEventListener("click", () => {
+                removeElement(view.parentNode)
+                console.log("DELETE CLICKED!")
+                saveContents();
+            });
             return view;
     }
 }
@@ -40,8 +60,10 @@ const createView = (type, firstTime = false, jsonObj = null) => {
 const appendView = (node, type) => {
     const view = document.createElement(type);
     if (type === "P") {
-        view.innerHTML = `<input type="text" class="todo-item" style="font-size:12px;width:85%">`;
-        view.appendChild(createView("IMG"));
+        view.innerHTML = `<input type="text" class="todo-item" 
+                            onfocusout="saveContents()"
+                            style="font-size:12px;width:85%">`;
+        view.appendChild(createView("IMG", true, {"src":"images/clear.png"}));
         node.insertBefore(view, node.lastChild);
     } else if (type === "DIV") {
         // Create a new tile and append
@@ -49,6 +71,7 @@ const appendView = (node, type) => {
         const textView = document.createTextNode(createdOnString);
         view.setAttribute("class", "tile");
         view.appendChild(textView);
+        view.appendChild(createView("IMG", true, {"src":"images/rubbish-bin.png"}));
         appendView(view, "IMG");
         appendView(view, "P");
         node.insertBefore(view, node.firstChild);
@@ -58,6 +81,8 @@ const appendView = (node, type) => {
         view.setAttribute("src", "images/icons8-plus-40.png");
         view.addEventListener("click", () => {
             appendView(node, "P");
+            console.log("CLICKED HERE!");
+            saveContents();
         })
         p.appendChild(view);
         node.appendChild(p);
@@ -68,6 +93,7 @@ const onClick = (elementId) => {
     const node = document.getElementById(elementId);
     if (elementId === "container") {
         appendView(node, "DIV");
+        saveContents();
     } else {
         appendView(node, "P");
     }
@@ -100,9 +126,15 @@ const getContents = (elementId) => {
         for (child of todoItems) {
             if (child.value) {
                 jsonString += `"${child.value}", `;
+            } else { 
+                jsonString += `"-1", `;
             }
         }
-        jsonString = `${jsonString.substring(0, jsonString.length - 2)}]},`
+        if (jsonString[jsonString.length - 2] === ",") {
+            jsonString = `${jsonString.substring(0, jsonString.length - 2)}]},`
+        } else { 
+            jsonString += `]},`;
+        }
     }
     if (jsonString[jsonString.length - 1] === ",") {
         jsonString = `${jsonString.substring(0, jsonString.length - 1)}]}`;
@@ -112,17 +144,6 @@ const getContents = (elementId) => {
     return jsonString;
 }
 
-const saveContents = () => { 
-    localStorage.setItem("greetings", "Hello world!");
-    localStorage.setItem("name", "Mrinmay");
-    localStorage.setItem("jsonString", getContents("container"));
-}
-
-const loadContents = () => {
-    if ("jsonString" in localStorage) {
-        loadViews(JSON.parse(localStorage.getItem("jsonString")));
-    }
-}
 
 /**
  * A function to load the data and recreate the views 
