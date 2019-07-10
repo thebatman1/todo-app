@@ -1,5 +1,30 @@
 console.log("Hello there!");
-let appState = {};
+let appState = {
+    tiles: []
+};
+
+let tile = {
+    title: "",
+    todoItems: [],
+    /**
+     * @param {string} titleString The title of the TODO
+     */
+    set title (titleString) { 
+        this.title = titleString;
+    },
+    get title() { 
+        return this.title;
+    },
+    /**
+     * @param {string} item The todo item of a particular list
+     */
+    addTodoItem: function (item) {
+        this.todoItems.push(item);
+    },
+    get todoItems() { 
+        return this.todoItems;
+    }
+};
 
 const removeElement = (node) => {
     node.parentNode.removeChild(node);
@@ -9,9 +34,6 @@ const removeElement = (node) => {
 const saveContents = () => {
     localStorage.setItem("jsonString", getContents("container"));
 }
-
-
-
 
 const createView = (type, firstTime = false, jsonObj = null) => {
     const view = document.createElement(type);
@@ -26,45 +48,65 @@ const createView = (type, firstTime = false, jsonObj = null) => {
             const textView = document.createTextNode(createdOnString);
             view.setAttribute("class", "tile");
             view.appendChild(textView);
-            view.appendChild(createView("IMG", false, {
+            const img = createView("IMG", false, {
                 "src": "images/rubbish-bin.png",
                 "imageType": "rem"
-            }));
+            });
+            img.style.visibility = "hidden";
+            view.appendChild(img);
             appendView(view, "IMG");
+            view.addEventListener("mouseover", () => {
+                img.style.visibility = "visible";
+            });
+            view.addEventListener("mouseout", () => {
+                img.style.visibility = "hidden";
+            });
             return view;
         case "P":
-            if (firstTime) {
-                view.innerHTML = `<input type="text" class="todo-item" 
+            let innerString = `<input type="text" class="todo-item" 
                                     onfocusout="saveContents()"
-                                    style="font-size:12px;width:85%">`;
-            } else {
-                view.innerHTML = `<input type="text" class="todo-item" 
-                                    onfocusout="saveContents()"
-                                    style="font-size:12px;width:85%"
-                                    value="${(jsonObj["todo-item"] === "-1") ? " " : jsonObj["todo-item"]}">`;
+                                    style="font-size:12px;width:85%"`;
+            if (!firstTime) {
+                innerString += ` value="${(jsonObj["todo-item"] === "-1") ? " " : jsonObj["todo-item"]}"`; 
             }
-            console.log(view.innerHTML);
-            console.log(view.innerHTML);
-            view.appendChild(createView("IMG", true, {
+            innerString += `>`;
+            view.innerHTML = innerString;
+            const im = createView("IMG", true, {
                 "src": "images/clear.png",
                 "imageType": "rem"
-            }));
+            })
+            im.style.visibility = "hidden";
+            view.appendChild(im);
+            view.addEventListener("mouseover", () => {
+                im.style.visibility = "visible";
+            });
+            view.addEventListener("mouseout", () => {
+                im.style.visibility = "hidden";
+            });
             return view;
         case "IMG":
             view.setAttribute("src", jsonObj["src"]);
             switch (jsonObj["imageType"]) {
                 case "plus":
                     view.addEventListener("click", () => {
-                        appendView(view.parentNode, "P");
+                        appendView(view.parentNode.parentNode, "P");
                         console.log("CLICKED HERE!");
                     });
                     break;
                 case "rem":
-                    view.setAttribute("style", "margin-left:8px;vertical-align:sub")
+                    view.setAttribute("style", "margin-left:8px;vertical-align:sub");
                     view.addEventListener("click", () => {
-                        removeElement(view.parentNode)
-                        console.log("DELETE CLICKED!")
+                        removeElement(view.parentNode);
+                        console.log(view.parentNode);
+                        console.log("DELETE CLICKED!");
                     });
+                    // const parent = view.parentNode;
+                    // parent.addEventListener("onmouseover", () => { 
+                    //     view.style.visibility = "visible";
+                    // });
+                    // parent.addEventListener("onmouseout", () => { 
+                    //     view.style.visibility = "hidden";
+                    // });
                     break;
 
             }
@@ -81,12 +123,14 @@ const createView = (type, firstTime = false, jsonObj = null) => {
  */
 const appendView = (node, type) => {
     if (type === "P") {
-        node.insertBefore(createView(type, true), node.lastChild);
+        const view = createView(type, true);
+        node.insertBefore(view, node.lastChild);
     } else if (type === "DIV") {
         // Create a new tile and append
         const view = createView(type, true);
         appendView(view, "P");
         node.insertBefore(view, node.firstChild);
+
     } else {
         const view = createView(type, true, {
             "imageType": "plus",
@@ -168,18 +212,6 @@ const loadViews = (jsonObj) => {
             view.insertBefore(todoItem, view.lastChild);
         })
     });
-
-    // for (element of tiles) {
-    //     if (element.todos.length === 0) {
-    //         continue;
-    //     }
-    //     const view = createView("DIV", false, { "title": element.title });
-    //     root.appendChild(view);
-    //     for (todo of element.todos) {
-    //         const todoItem = createView("P", false, { "todo-item": todo });
-    //         view.insertBefore(todoItem, view.lastChild);
-    //     }
-    // }
 }
 
 const loadContents = () => {
