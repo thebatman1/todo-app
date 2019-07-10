@@ -1,0 +1,26 @@
+{
+  "name": "todo-list",
+  "version": "1.0.0",
+  "description": "A todo list web app for learning html css javascript",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thebatman1/todo-app.git"
+  },
+  "keywords": [
+    "javascript"
+  ],
+  "author": "Mrinmay Mukherjee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thebatman1/todo-app/issues"
+  },
+  "homepage": "https://github.com/thebatman1/todo-app#readme",
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-google": "^0.13.0"
+  }
+}
